@@ -11,9 +11,11 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.github.theprogmatheus.zonadelivery.dto.UserAccountDTO;
+import com.github.theprogmatheus.zonadelivery.dto.AuthUserAccountDTO;
 import com.github.theprogmatheus.zonadelivery.model.UserAccountModel;
 import com.github.theprogmatheus.zonadelivery.repository.UserAccountRepository;
+import com.github.theprogmatheus.zonadelivery.util.ProcessedServiceResult;
+import com.github.theprogmatheus.zonadelivery.util.ProcessedServiceResult.ProcessedServiceResultType;
 
 @Service
 public class UserAccountService {
@@ -23,12 +25,29 @@ public class UserAccountService {
 	@Autowired
 	private UserAccountRepository userAccountRepository;
 
-	public UserAccountModel register(UserAccountDTO userAccountDTO, List<String> authorities) throws Exception {
+	public ProcessedServiceResult<UserAccountModel> register(AuthUserAccountDTO authUserAccountDTO,
+			List<String> authorities) throws Exception {
 		try {
-			return this.userAccountRepository.saveAndFlush(
-					new UserAccountModel(null, userAccountDTO.getName().toLowerCase(), userAccountDTO.getEmail(),
-							userAccountDTO.getPhone(), passwordEncoder.encode(userAccountDTO.getPassword()),
-							userAccountDTO.getName(), authorities, true, true, true, true));
+
+			ProcessedServiceResult<UserAccountModel> processedServiceResult = new ProcessedServiceResult<UserAccountModel>();
+
+			if (authUserAccountDTO.getUsername() == null || authUserAccountDTO.getUsername().isEmpty())
+				return processedServiceResult.status(ProcessedServiceResultType.FAIL)
+						.message("Você precisa definir um nome para o novo usuário.");
+
+			if (authUserAccountDTO.getPassword() == null || authUserAccountDTO.getPassword().isEmpty())
+				return processedServiceResult.status(ProcessedServiceResultType.FAIL)
+						.message("Você precisa definir uma senha para o novo usuário.");
+
+			UserAccountModel userAccountModel = this.userAccountRepository.saveAndFlush(new UserAccountModel(null,
+					authUserAccountDTO.getUsername().toLowerCase(), authUserAccountDTO.getEmail(),
+					authUserAccountDTO.getPhone(), passwordEncoder.encode(authUserAccountDTO.getPassword()),
+					(authUserAccountDTO.getDisplayName() != null ? authUserAccountDTO.getDisplayName()
+							: authUserAccountDTO.getUsername()),
+					authorities, true, true, true, true));
+
+			return processedServiceResult.status(ProcessedServiceResultType.SUCCESS)
+					.message("Novo usuário cadastrado com sucesso.").result(userAccountModel);
 		} catch (Exception exception) {
 			throw exception;
 		}
@@ -143,14 +162,6 @@ public class UserAccountService {
 	}
 
 	public UserAccountModel findById(UUID id) {
-		System.out.println(id);
-		for (UserAccountModel u : this.userAccountRepository.findAll()) {
-			System.out.println(u.getId());
-		}
-
-		Optional<UserAccountModel> a = this.userAccountRepository.findById(id);
-
-		System.out.println(a.isPresent());
 		return this.userAccountRepository.findById(id).orElse(null);
 	}
 

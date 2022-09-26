@@ -10,8 +10,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.theprogmatheus.zonadelivery.ZonaDeliveryApplication;
+import com.github.theprogmatheus.zonadelivery.dto.AuthUserAccountDTO;
+import com.github.theprogmatheus.zonadelivery.dto.OccurrenceResponseDTO;
 import com.github.theprogmatheus.zonadelivery.dto.UserAccountDTO;
+import com.github.theprogmatheus.zonadelivery.model.UserAccountModel;
 import com.github.theprogmatheus.zonadelivery.services.UserAccountService;
+import com.github.theprogmatheus.zonadelivery.util.ProcessedServiceResult;
+import com.github.theprogmatheus.zonadelivery.util.ProcessedServiceResult.ProcessedServiceResultType;
 
 @RestController
 @RequestMapping("/auth")
@@ -21,15 +27,26 @@ public class AuthController {
 	private UserAccountService userAccountService;
 
 	@PostMapping("/register")
-	public ResponseEntity<Object> register(@RequestBody UserAccountDTO userAccountDTO) {
+	public ResponseEntity<Object> register(@RequestBody AuthUserAccountDTO authUserAccountDTO) {
 		try {
-			if (userAccountDTO != null)
-				return ResponseEntity.ok(userAccountService.register(userAccountDTO, new ArrayList<>()));
+
+			ProcessedServiceResult<UserAccountModel> processedServiceResult = this.userAccountService
+					.register(authUserAccountDTO, new ArrayList<>());
+
+			if (processedServiceResult.getStatus() == ProcessedServiceResultType.SUCCESS)
+				return ResponseEntity.status(HttpStatus.CREATED)
+						.body(new UserAccountDTO(processedServiceResult.getResult()));
 			else
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body("You need to provide the data required for registration");
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OccurrenceResponseDTO(
+						processedServiceResult.getStatus().name(), processedServiceResult.getMessage()));
+
 		} catch (Exception exception) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getMessage());
+
+			ZonaDeliveryApplication.log
+					.error("Ocorreu um erro ao tentar registrar um novo usuário: " + exception.getMessage());
+
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new OccurrenceResponseDTO("ERROR",
+					"Ocorreu um erro interno ao tentar registrar um novo usuário, entre em contato com o suporte."));
 		}
 	}
 
