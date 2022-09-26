@@ -36,6 +36,7 @@ public class UserAccountModel implements UserDetails {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(nullable = false, unique = true)
 	private UUID id;
 
 	@Column(length = 128, nullable = false, unique = true)
@@ -50,7 +51,7 @@ public class UserAccountModel implements UserDetails {
 	@Column(nullable = false)
 	private String password;
 
-	@Column(length = 128, nullable = false)
+	@Column(length = 128)
 	private String displayName;
 
 	@Type(type = "json")
