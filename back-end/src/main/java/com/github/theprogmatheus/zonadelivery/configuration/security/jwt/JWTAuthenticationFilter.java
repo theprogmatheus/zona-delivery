@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.theprogmatheus.zonadelivery.dto.UserAccountDTO;
+import com.github.theprogmatheus.zonadelivery.dto.AuthUserAccountDTO;
 import com.github.theprogmatheus.zonadelivery.model.UserAccountModel;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -40,11 +40,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
 		try {
-			UserAccountDTO userAccountDTO = new ObjectMapper().readValue(request.getInputStream(),
-					UserAccountDTO.class);
+			AuthUserAccountDTO userAccountDTO = new ObjectMapper().readValue(request.getInputStream(),
+					AuthUserAccountDTO.class);
 
 			return this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-					userAccountDTO.getName(), userAccountDTO.getPassword(), null));
+					userAccountDTO.getUsername(), userAccountDTO.getPassword(), null));
 		} catch (IOException e) {
 			throw new RuntimeException("Falha ao autenticar usuario: ", e);
 		}

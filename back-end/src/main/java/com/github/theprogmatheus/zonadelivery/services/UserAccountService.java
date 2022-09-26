@@ -11,7 +11,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.github.theprogmatheus.zonadelivery.dto.UserAccountDTO;
+import com.github.theprogmatheus.zonadelivery.dto.AuthUserAccountDTO;
 import com.github.theprogmatheus.zonadelivery.model.UserAccountModel;
 import com.github.theprogmatheus.zonadelivery.repository.UserAccountRepository;
 
@@ -23,12 +23,13 @@ public class UserAccountService {
 	@Autowired
 	private UserAccountRepository userAccountRepository;
 
-	public UserAccountModel register(UserAccountDTO userAccountDTO, List<String> authorities) throws Exception {
+	public UserAccountModel register(AuthUserAccountDTO registerUserAccountDTO, List<String> authorities)
+			throws Exception {
 		try {
-			return this.userAccountRepository.saveAndFlush(
-					new UserAccountModel(null, userAccountDTO.getName().toLowerCase(), userAccountDTO.getEmail(),
-							userAccountDTO.getPhone(), passwordEncoder.encode(userAccountDTO.getPassword()),
-							userAccountDTO.getName(), authorities, true, true, true, true));
+			return this.userAccountRepository.saveAndFlush(new UserAccountModel(null,
+					registerUserAccountDTO.getUsername().toLowerCase(), registerUserAccountDTO.getEmail(),
+					registerUserAccountDTO.getPhone(), passwordEncoder.encode(registerUserAccountDTO.getPassword()),
+					registerUserAccountDTO.getDisplayName(), authorities, true, true, true, true));
 		} catch (Exception exception) {
 			throw exception;
 		}
