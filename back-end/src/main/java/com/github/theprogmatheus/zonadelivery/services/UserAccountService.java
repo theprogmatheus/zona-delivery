@@ -162,14 +162,6 @@ public class UserAccountService {
 	}
 
 	public UserAccountModel findById(UUID id) {
-		System.out.println(id);
-		for (UserAccountModel u : this.userAccountRepository.findAll()) {
-			System.out.println(u.getId());
-		}
-
-		Optional<UserAccountModel> a = this.userAccountRepository.findById(id);
-
-		System.out.println(a.isPresent());
 		return this.userAccountRepository.findById(id).orElse(null);
 	}
 

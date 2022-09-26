@@ -36,7 +36,8 @@ public class UserAccountModel implements UserDetails {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(nullable = false, unique = true)
+	@Column(columnDefinition = "VARCHAR(36)", nullable = false, unique = true)
+	@Type(type = "uuid-char")
 	private UUID id;
 
 	@Column(length = 128, nullable = false, unique = true)
