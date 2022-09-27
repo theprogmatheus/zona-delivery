@@ -39,7 +39,7 @@ public class SecurityConfiguration {
 
 				.and()
 
-				// libera todo o acesso ao /auth/login
+				// libera todo o acesso ao /auth/login e /auth/register
 				.authorizeRequests().antMatchers(HttpMethod.POST, AUTH_REGISTER_URL, AUTH_LOGIN_URL).permitAll()
 
 				// qualquer outro acesso tem que estar autenticado
